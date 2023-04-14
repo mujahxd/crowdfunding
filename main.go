@@ -9,6 +9,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/mujahxd/crowdfunding/auth"
+	"github.com/mujahxd/crowdfunding/campaign"
 	"github.com/mujahxd/crowdfunding/handler"
 	"github.com/mujahxd/crowdfunding/helper"
 	"github.com/mujahxd/crowdfunding/user"
@@ -25,6 +26,7 @@ func main() {
 	}
 
 	userRepository := user.NewRepository(db)
+	campaignRepository := campaign.NewRepository(db)
 
 	userService := user.NewService(userRepository)
 	authService := auth.NewService()
