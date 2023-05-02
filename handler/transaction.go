@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mujahxd/crowdfunding/helper"
-	"github.com/mujahxd/crowdfunding/payment"
 	"github.com/mujahxd/crowdfunding/transaction"
 	"github.com/mujahxd/crowdfunding/user"
 )
@@ -16,12 +15,11 @@ import (
 // service, bekal campaign id bisa panggil repo
 // repo cari data trx suatu campaign
 type transactionHandler struct {
-	service        transaction.Service
-	paymentService payment.Service
+	service transaction.Service
 }
 
-func NewTransactionHandler(service transaction.Service, paymentService payment.Service) *transactionHandler {
-	return &transactionHandler{service, paymentService}
+func NewTransactionHandler(service transaction.Service) *transactionHandler {
+	return &transactionHandler{service}
 }
 
 func (h *transactionHandler) GetCampaignTransactions(c *gin.Context) {
@@ -100,7 +98,7 @@ func (h *transactionHandler) GetNotification(c *gin.Context) {
 
 		return
 	}
-	err = h.paymentService.ProcessPayment(input)
+	err = h.service.ProcessPayment(input)
 
 	if err != nil {
 		response := helper.APIResponse("failed to process notification", http.StatusBadRequest, "error", nil)
