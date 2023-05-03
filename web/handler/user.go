@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -60,6 +61,7 @@ func (h *userHandler) Edit(c *gin.Context) {
 	registeredUser, err := h.userService.GetUserByID(idParam)
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "error.html", nil)
+		return
 	}
 
 	input := user.FormUpdateUserInput{}
@@ -81,11 +83,45 @@ func (h *userHandler) Update(c *gin.Context) {
 	if err != nil {
 		input.Error = err
 		c.HTML(http.StatusOK, "user_edit.html", input)
+		return
 	}
 
 	input.ID = idParam
 
 	_, err = h.userService.UpdateUser(input)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error.html", nil)
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/users")
+}
+
+func (h *userHandler) NewAvatar(c *gin.Context) {
+	idParam, _ := strconv.Atoi(c.Param("id"))
+
+	c.HTML(http.StatusOK, "user_avatar.html", gin.H{"ID": idParam})
+}
+
+func (h *userHandler) CreateAvatar(c *gin.Context) {
+	idParam, _ := strconv.Atoi(c.Param("id"))
+
+	file, err := c.FormFile("avatar")
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error.html", nil)
+		return
+	}
+
+	userID := idParam
+	path := fmt.Sprintf("images/%d-%s", userID, file.Filename)
+
+	err = c.SaveUploadedFile(file, path)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error.html", nil)
+		return
+	}
+
+	_, err = h.userService.SaveAvatar(userID, path)
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "error.html", nil)
 		return
